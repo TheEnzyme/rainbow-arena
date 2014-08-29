@@ -166,6 +166,20 @@ function game:enter(previous, w, h, nbots)
 	local c_drag, c_accel = calculate_drag_accel(800, 5)
 
 	local bullet = require("entities.projectiles.bullet")()
+	
+	local rocket = require("entities.projectiles.rocket"){
+		radius = 15
+	}
+
+	local rocket_launcher = require("entities.weapons.projectile"){
+		max_heat = 2,
+		shot_heat = 1,
+		
+		kind = "single",
+		projectile = rocket,
+		projectile_speed = 100,
+		shot_delay = 0.5
+	}
 
 	local pistol = require("entities.weapons.projectile"){
 		max_heat = 2,
@@ -209,7 +223,7 @@ function game:enter(previous, w, h, nbots)
 
 		CollisionPhysics = true,
 
-		Weapon = minigun,
+		Weapon = rocket_launcher,
 
 		Player = true,
 		CameraTarget = true
