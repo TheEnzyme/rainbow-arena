@@ -174,7 +174,7 @@ function game:enter(previous, w, h, nbots)
 		kind = "single",
 		projectile = bullet,
 		projectile_speed = 800,
-		shot_delay = 0.1
+		shot_delay = 0.5
 	}
 
 	local minigun = require("entities.weapons.triple_minigun"){
@@ -287,7 +287,7 @@ function game:mousepressed(x, y, b)
 	if b == "r" then
 		world:spawnEntity(require("entities.explosion"){
 			position = vector.new(world.camera:worldCoords(x, y)),
-			force = 10^9
+			force = 2*10^6
 		})
 	end
 
