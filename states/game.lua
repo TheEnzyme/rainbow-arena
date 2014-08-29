@@ -20,6 +20,8 @@ local player
 
 local game_speed = 1
 
+local weapon_value = 2
+
 local PLAYER_RADIUS = 30
 
 local function loadSystems(dir)
@@ -203,6 +205,7 @@ function game:enter(previous, w, h, nbots)
 		final_shot_delay = 0.05,
 		spinup_time = 2
 	}
+	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher}
 
 	player = world:spawnEntity{
 		Name = "Player",
@@ -223,7 +226,7 @@ function game:enter(previous, w, h, nbots)
 
 		CollisionPhysics = true,
 
-		Weapon = rocket_launcher,
+		Weapon = weapon_table[weapon_value],
 
 		Player = true,
 		CameraTarget = true
@@ -280,6 +283,7 @@ function game:draw()
 		"Entities: " .. util.table.nelem(world.entities),
 		10, 10 + love.graphics.getFont():getHeight()
 	)
+	love.graphics.print("Weapon_value: " .. weapon_value)
 end
 
 
@@ -288,6 +292,31 @@ function game:keypressed(key, isrepeat)
 end
 
 function game:keyreleased(key)
+	if key == "lshift" then
+		if game_speed >= 1 then
+			game_speed = 0.1
+		elseif game_speed <= 1 then
+			game_speed = 1
+		end
+	end
+
+	if key == 'q' then
+		if weapon_value > 0 then
+			weapon_value = weapon_value - 1
+		else
+			weapon_value = table.getn(weapon_table)
+		end
+		player.Weapon = weapon_table[weapon_value % table.getn(weapon_table)]
+	
+	elseif key == 'e' then
+		if weapon_value < 2 then
+			weapon_value = weapon_value + 1
+		else
+			weapon_value = 0
+		end
+		player.Weapon = weapon_table[weapon_value % table.getn(weapon_table)]
+	end
+	
 	world:emitEvent("KeyReleased", key)
 end
 

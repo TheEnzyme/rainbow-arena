@@ -15,7 +15,7 @@ function e_proj_rocket:on_collision(world, target, mtv)
 		}
 			position = endPosition
 	end
-	endPosition = self.Position:clone()
+	endPosition = self.Position
 	world:destroyEntity(self)	
 
 
