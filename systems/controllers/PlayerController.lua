@@ -19,10 +19,10 @@ return {
 				---
 
 				local lkd = love.keyboard.isDown
-				local k_up = lkd("up")
-				local k_down = lkd("down")
-				local k_left = lkd("left")
-				local k_right = lkd("right")
+				local k_up = lkd("w")
+				local k_down = lkd("s")
+				local k_left = lkd("a")
+				local k_right = lkd("d")
 
 				local accel = entity.MoveAcceleration
 				entity.InputAcceleration = entity.InputAcceleration or vector.new(0, 0)
