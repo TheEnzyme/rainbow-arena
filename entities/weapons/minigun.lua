@@ -16,7 +16,7 @@ function w_minigun:init(arg)
 	self.spinup_time = arg.spinup_time or 2
 	self.shake_radius = arg.shake_radius or 100
 
-	arg.kind = "repeat"
+	arg.kind = arg.kind or "repeat"
 
 	w_projectile.init(self, arg)
 end

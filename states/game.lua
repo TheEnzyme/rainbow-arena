@@ -21,7 +21,7 @@ local nelem = util.table.nelem
 
 ---
 
-local weapon_value = 2
+local weapon_value = 3
 
 local PLAYER_RADIUS = 30
 
@@ -178,10 +178,14 @@ function game:enter(previous, w, h, nbots)
 
 	local bullet = require("entities.projectiles.bullet")()
 	
+	local large_bullet = require("entities.projectiles.bullet"){
+		radius = 5
+	}
+	
 	local rocket = require("entities.projectiles.rocket"){
 		radius = 15
 	}
-
+		
 	local rocket_launcher = require("entities.weapons.projectile"){
 		max_heat = 2,
 		shot_heat = 1,
@@ -191,22 +195,32 @@ function game:enter(previous, w, h, nbots)
 		projectile_speed = 800,
 		shot_delay = 0.5
 	}
-
-	local pistol = require("entities.weapons.projectile"){
+	
+	local shotgun = require("entities.weapons.shotgun"){
 		max_heat = 2,
-		shot_heat = 0.1,
+		shot_heat = 0.01,
 
 		kind = "single",
 		projectile = bullet,
-		projectile_speed = 800,
-		shot_delay = 0.5
+		projectile_speed = 200,
+		shot_delay = 0.1
+	}
+
+	local pistol = require("entities.weapons.minigun"){
+		max_heat = 3,
+		shot_heat = 0.25,
+
+		kind = "single",
+		projectile = large_bullet,
+		projectile_speed = 1600,
+		shot_delay = 0.3
 	}
 
 	local minigun = require("entities.weapons.triple_minigun"){
 		max_heat = 2,
 		shot_heat = 0.01,
 
-		kind = "single",
+		kind = "repeat",
 		projectile = bullet,
 		projectile_speed = 800,
 
@@ -214,7 +228,7 @@ function game:enter(previous, w, h, nbots)
 		final_shot_delay = 0.05,
 		spinup_time = 2
 	}
-	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher}
+	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher, [3] = shotgun}
 
 	player = world:spawnEntity{
 		Name = "Player",
@@ -304,11 +318,13 @@ end
 
 function game:keyreleased(key)
 	if key == "lshift" then
-		if game_speed >= 1 then
-			game_speed = 0.1
-		elseif game_speed <= 1 then
-			game_speed = 1
+		if world.speed >= 1 then
+			world.speed = 0.1
+		elseif world.speed <= 1 then
+			world.speed = 1
 		end
+	elseif key == "z" then
+		world.speed = 0
 	end
 
 	if key == 'q' then

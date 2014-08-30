@@ -8,7 +8,7 @@ local e_proj_rocket = class{__includes = e_proj_physical}
 function e_proj_rocket:on_collision(world, target, mtv)
 	endPosition = self.Position
 
-	local explosion = world:spawnEntity(require("entities.explosion")){
+	local explosion = world:spawnEntity(require("entities.effects.explosion")){
 			position = endPosition,
 			radius = 25,
 			force = 6*10^4
