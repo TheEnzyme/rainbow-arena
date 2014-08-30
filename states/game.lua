@@ -1,33 +1,40 @@
 local game = {}
 
 local ces = require("lib.self.ces")
+local spatialhash = require("lib.self.spatialhash")
+local screenshake = require("lib.self.screenshake")
+local util = require("lib.self.util")
+
+local circleutil = require("util.circle")
+
 local camera = require("lib.hump.camera")
 local vector = require("lib.hump.vector")
 local signal = require("lib.hump.signal")
 local timer = require("lib.hump.timer")
-local spatialhash = require("lib.self.spatialhash")
-local util = require("lib.self.util")
 
-local screenshake = require("lib.self.screenshake")
-
-local circleutil = require("util.circle")
+---
 
 local aabb = circleutil.aabb
 local colliding = circleutil.colliding
 
-local world
-local player
+local nelem = util.table.nelem
 
-local game_speed = 1
+---
 
 local weapon_value = 2
 
 local PLAYER_RADIUS = 30
 
-local function loadSystems(dir)
+---
+
+local world
+
+---
+
+local function load_systems(dir)
 	for _, item in ipairs(love.filesystem.getDirectoryItems(dir)) do
 		if love.filesystem.isDirectory(dir .. "/" .. item) then
-			loadSystems(dir .. "/" .. item)
+			load_systems(dir .. "/" .. item)
 		else
 			local t = love.filesystem.load(dir .. "/" .. item)()
 
@@ -49,6 +56,8 @@ local function loadSystems(dir)
 	end
 end
 
+---
+
 function game:init()
 	world = ces.new()
 
@@ -56,6 +65,12 @@ function game:init()
 	world.signal = signal.new()
 	world.screenshake = 0
 	world.hash = spatialhash.new()
+	world.speed = 1
+
+	---
+
+	love.audio.setOrientation(0,0,-1, 0,1,0)
+	love.audio.setDistanceModel("linear clamped")
 
 	---
 
@@ -121,13 +136,7 @@ function game:init()
 
 	---
 
-	function world:add_screenshake(intensity)
-		self.screenshake = self.screenshake + intensity
-	end
-
-	---
-
-	loadSystems("systems")
+	load_systems("systems")
 end
 
 local function generate_position(radius)
@@ -254,11 +263,13 @@ function game:enter(previous, w, h, nbots)
 end
 
 function game:update(dt)
-	game_speed = util.math.clamp(0.1, game_speed, 7)
+	world.speed = util.math.clamp(0.1, world.speed, 7)
+	local adjdt = dt * world.speed
+
+	love.audio.setPosition(world.camera.x, world.camera.y, 0)
 
 	world.screenshake = 0
 
-	local adjdt = dt * game_speed
 	timer.update(adjdt)
 	world:runSystems("update", adjdt)
 end
@@ -274,13 +285,13 @@ function game:draw()
 	love.graphics.line(world.w,world.h, world.w,0)
 	love.graphics.line(world.w,0, 0,0)
 
-	world:runSystems("draw", main_camera)
+	world:runSystems("draw")
 	world.camera:detach()
 
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.print("Speed multiplier: " .. game_speed, 10, 10)
+	love.graphics.print("Speed multiplier: " .. world.speed, 10, 10)
 	love.graphics.print(
-		"Entities: " .. util.table.nelem(world.entities),
+		"Entities: " .. nelem(world.entities),
 		10, 10 + love.graphics.getFont():getHeight()
 	)
 	love.graphics.print("Weapon_value: " .. weapon_value)
@@ -322,13 +333,13 @@ end
 
 function game:mousepressed(x, y, b)
 	if b == "wd" then
-		game_speed = game_speed - 0.1
+		world.speed = world.speed - 0.1
 	elseif b == "wu" then
-		game_speed = game_speed + 0.1
+		world.speed = world.speed + 0.1
 	end
 
 	if b == "r" then
-		world:spawnEntity(require("entities.explosion"){
+		world:spawnEntity(require("entities.effects.explosion"){
 			position = vector.new(world.camera:worldCoords(x, y)),
 			force = 2*10^6
 		})

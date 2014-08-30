@@ -2,6 +2,8 @@ local circleutil = require("util.circle")
 local vector = require("lib.hump.vector")
 local util = require("lib.self.util")
 
+---
+
 local colliding = circleutil.colliding
 local aabb = circleutil.aabb
 local invert = util.table.invert
@@ -159,7 +161,7 @@ return {
 			name = "DestroyOutsideArena",
 			requires = {"Position", "ArenaBounded"},
 			update = function(entity, world, dt)
-				local tolerance = entity.ArenaBounded or 0
+				local tolerance = tonumber(entity.ArenaBounded) or -entity.Radius or 0
 				if entity.Position.x < 0 - tolerance or entity.Position.x > world.w + tolerance
 					or entity.Position.y < 0 - tolerance or entity.Position.y > world.h + tolerance
 				then
@@ -181,7 +183,7 @@ return {
 					ent1:OnEntityCollision(world, ent2, mtv)
 				end
 
-				colback_called[ent1][ent2] = ent2
+				colback_called[ent1][ent2] = true
 
 				---
 
@@ -193,7 +195,7 @@ return {
 					ent2:OnEntityCollision(world, ent1, mtv)
 				end
 
-				colback_called[ent2][ent1] = ent1
+				colback_called[ent2][ent1] = true
 			end
 		},
 
