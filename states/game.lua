@@ -179,7 +179,7 @@ function game:enter(previous, w, h, nbots)
 		
 		kind = "single",
 		projectile = rocket,
-		projectile_speed = 100,
+		projectile_speed = 800,
 		shot_delay = 0.5
 	}
 
@@ -306,7 +306,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = table.getn(weapon_table)
 		end
-		player.Weapon = weapon_table[weapon_value % table.getn(weapon_table)]
+		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	
 	elseif key == 'e' then
 		if weapon_value < 2 then
@@ -314,7 +314,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = 0
 		end
-		player.Weapon = weapon_table[weapon_value % table.getn(weapon_table)]
+		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	end
 	
 	world:emitEvent("KeyReleased", key)
