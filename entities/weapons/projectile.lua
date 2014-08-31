@@ -1,6 +1,9 @@
 local class = require("lib.hump.class")
+local timer = require("lib.hump.timer")
 local weaponutil = require("util.weapon")
 local util = require("lib.self.util")
+
+local soundutil = require("util.sound")
 
 ---
 
@@ -19,6 +22,12 @@ function w_projectile:init(arg)
 	self.projectile = arg.projectile
 	self.projectile_speed = arg.projectile_speed or 800
 	self.shot_delay = arg.shot_delay or 0.1
+
+	self.shot_sound = arg.shot_sound
+
+	-- For burst fire
+	self.burst_shots = arg.burst_shots or 3
+	self.burst_shot_delay = arg.burst_shot_delay or 0.03
 
 	self.shot_timer = 0
 
@@ -60,24 +69,38 @@ function w_projectile:fire(host, world, pos, dir)
 	self.shot_timer = self.shot_delay
 	self.heat = self.heat + self.shot_heat
 
+	if self.shot_sound then
+		sound.play_file(self.shot_sound, pos)
+	end
+
 	host.ColorPulse = 1
 end
 
 ---
 
-function w_projectile:start(host, world, pos, dir)
-	w_base.start(self, host, world, pos, dir)
-end
-
 function w_projectile:firing(dt, host, world, pos, dir)
 	if self.shot_timer == 0 then
-		if (self.kind == "single" and not self.fired) or self.kind ~= "single" then
+		if (self.kind == "single" and not self.fired) or self.kind == "repeat" then
 			self.fired = true
 			self:fire(host, world, pos, dir)
+
+		elseif self.kind == "burst" and not self.fired then
+			self.fired = true
+
+			local shot = 1
+			timer.add(self.burst_shot_delay, function(func)
+				self:fire(host, world, pos, dir)
+
+				if shot < self.burst_shots then
+					timer.add(self.burst_shot_delay, func)
+				end
+
+				shot = shot + 1
+			end)
 		end
 	end
 
-	w_base.update(self, host, world, pos, dir)
+	w_base.firing(self, dt, host, world, pos, dir)
 end
 
 function w_projectile:cease(host, world)
@@ -91,6 +114,8 @@ function w_projectile:update(dt, host, world)
 	if self.shot_timer < 0 then
 		self.shot_timer = 0
 	end
+
+	w_base.update(self, dt, host, world)
 end
 
 ---

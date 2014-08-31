@@ -25,6 +25,8 @@ local weapon_value = 3
 
 local PLAYER_RADIUS = 30
 
+SOUND_POSITION_SCALE = 256
+
 ---
 
 local world
@@ -70,7 +72,7 @@ function game:init()
 	---
 
 	love.audio.setOrientation(0,0,-1, 0,1,0)
-	love.audio.setDistanceModel("linear clamped")
+	love.audio.setDistanceModel("inverse")
 
 	---
 
@@ -256,7 +258,7 @@ function game:enter(previous, w, h, nbots)
 	}
 
 	-- Place test balls.
-	for n = 1, 50 do
+	for n = 1, 10 do
 		local radius = 30
 		world:spawnEntity{
 			Name = "Ball " .. n,
@@ -280,7 +282,7 @@ function game:update(dt)
 	world.speed = util.math.clamp(0.1, world.speed, 7)
 	local adjdt = dt * world.speed
 
-	love.audio.setPosition(world.camera.x, world.camera.y, 0)
+	love.audio.setPosition(world.camera.x/SOUND_POSITION_SCALE, world.camera.y/SOUND_POSITION_SCALE, 0)
 
 	world.screenshake = 0
 
