@@ -184,6 +184,10 @@ function game:enter(previous, w, h, nbots)
 		radius = 5
 	}
 	
+	local pellet = require("entities.projectiles.bullet"){
+		radius = 1
+	}
+	
 	local rocket = require("entities.projectiles.rocket"){
 		radius = 15
 	}
@@ -200,22 +204,26 @@ function game:enter(previous, w, h, nbots)
 	
 	local shotgun = require("entities.weapons.shotgun"){
 		max_heat = 2,
-		shot_heat = 0.01,
+		shot_heat = 0.1,
 
 		kind = "single",
 		projectile = bullet,
-		projectile_speed = 200,
-		shot_delay = 0.1
+		projectile_speed = 800,
+		shot_delay = 0.4,
+		shots = 16,
+		arc = 10
 	}
 
-	local pistol = require("entities.weapons.minigun"){
+	local pistol = require("entities.weapons.projectile"){
 		max_heat = 3,
 		shot_heat = 0.25,
 
-		kind = "single",
+		kind = "burst",
 		projectile = large_bullet,
-		projectile_speed = 1600,
-		shot_delay = 0.3
+		projectile_speed = 1000,
+		shot_delay = 0.3,
+		burst_shots = 3,
+		burst_shot_delay = 0.1
 	}
 
 	local minigun = require("entities.weapons.triple_minigun"){
@@ -257,8 +265,8 @@ function game:enter(previous, w, h, nbots)
 		CameraTarget = true
 	}
 
+	for n = 1, 50 do
 	-- Place test balls.
-	for n = 1, 10 do
 		local radius = 30
 		world:spawnEntity{
 			Name = "Ball " .. n,
@@ -325,8 +333,6 @@ function game:keyreleased(key)
 		elseif world.speed <= 1 then
 			world.speed = 1
 		end
-	elseif key == "z" then
-		world.speed = 0
 	end
 
 	if key == 'q' then
@@ -338,7 +344,7 @@ function game:keyreleased(key)
 		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	
 	elseif key == 'e' then
-		if weapon_value < 2 then
+		if weapon_value < table.getn(weapon_table) then
 			weapon_value = weapon_value + 1
 		else
 			weapon_value = 0
