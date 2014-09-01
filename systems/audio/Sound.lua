@@ -10,7 +10,8 @@ local clamp = util.math.clamp
 ---
 
 local collision_sound = "audio/collision.wav"
-local volume_threshold_speed = 3000
+local volume_threshold_speed = 1600
+local collision_max_volume = 0.5
 
 ---
 
@@ -29,8 +30,6 @@ return {
 				assert(ss.source, "Sound component missing source field!")
 
 				ss.source:setPosition(source.Position.x/SOUND_POSITION_SCALE, source.Position.y/SOUND_POSITION_SCALE, 0)
-
-				print(ss.source:getAttenuationDistances())
 
 				local pitch = world.speed
 				if ss.pitch then
@@ -55,7 +54,7 @@ return {
 			event = "ArenaCollision",
 			func = function(world, entity, pos, side)
 				local source = love.audio.newSource(collision_sound)
-				source:setVolume( clamp(0, entity.Velocity:len() / volume_threshold_speed, 0.1) )
+				source:setVolume( clamp(0, entity.Velocity:len() / volume_threshold_speed, collision_max_volume) )
 				source:setPitch(world.speed)
 				soundutil.play(source, pos/SOUND_POSITION_SCALE)
 			end
@@ -66,7 +65,7 @@ return {
 				if can_spawn_col_sound then
 					local source = love.audio.newSource(collision_sound)
 					local pos = ent2.Position + mtv
-					source:setVolume( clamp(0, (ent1.Velocity + ent2.Velocity):len() / volume_threshold_speed, 0.1) )
+					source:setVolume( clamp(0, (ent1.Velocity + ent2.Velocity):len() / volume_threshold_speed, collision_max_volume) )
 					source:setPitch(world.speed)
 					soundutil.play(source, pos/SOUND_POSITION_SCALE)
 

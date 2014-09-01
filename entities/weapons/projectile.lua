@@ -18,6 +18,7 @@ local w_projectile = class{__includes = w_base}
 
 function w_projectile:init(arg)
 	self.kind = arg.kind or "single"
+
 	self.shot_heat = arg.shot_heat or 0.25
 	self.projectile = arg.projectile
 	self.projectile_speed = arg.projectile_speed or 800
@@ -63,17 +64,38 @@ function w_projectile:apply_recoil(host, projectile, dir)
 		self.projectile_speed * dir, host.Mass, host.Velocity)
 end
 
-function w_projectile:fire(host, world, pos, dir)
+---
+
+function w_projectile:fire_projectile(host, world, pos, dir)
 	local p = self:spawn_projectile(host, world, pos, dir)
 	self:apply_recoil(host, p, dir)
+
+	return p
+end
+
+function w_projectile:play_shot_sound(pos, pitch)
+	if self.shot_sound then
+		soundutil.play_file(self.shot_sound, pos/SOUND_POSITION_SCALE, pitch)
+	end
+end
+
+function w_projectile:apply_shot_effects(host, world, pos, dir)
 	self.shot_timer = self.shot_delay
 	self.heat = self.heat + self.shot_heat
 
-	if self.shot_sound then
-		sound.play_file(self.shot_sound, pos)
-	end
-
 	host.ColorPulse = 1
+
+	if self.shot_shake_intensity and self.shot_shake_duration then
+		self:set_screenshake(self.shot_shake_intensity, self.shot_shake_duration)
+	end
+end
+
+---
+
+function w_projectile:fire(host, world, pos, dir)
+	self:fire_projectile(host, world, pos, dir)
+	self:apply_shot_effects(host, world, pos, dir)
+	self:play_shot_sound(pos)
 end
 
 ---

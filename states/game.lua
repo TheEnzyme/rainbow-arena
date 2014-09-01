@@ -21,7 +21,7 @@ local nelem = util.table.nelem
 
 ---
 
-local weapon_value = 3
+local weapon_value = 4
 
 local PLAYER_RADIUS = 30
 
@@ -72,7 +72,7 @@ function game:init()
 	---
 
 	love.audio.setOrientation(0,0,-1, 0,1,0)
-	love.audio.setDistanceModel("inverse")
+	love.audio.setDistanceModel("inverse clamped")
 
 	---
 
@@ -179,6 +179,7 @@ function game:enter(previous, w, h, nbots)
 	local c_drag, c_accel = calculate_drag_accel(800, 5)
 
 	local bullet = require("entities.projectiles.bullet")()
+
 	
 	local large_bullet = require("entities.projectiles.bullet"){
 		radius = 5
@@ -205,12 +206,21 @@ function game:enter(previous, w, h, nbots)
 
 		kind = "single",
 		projectile = bullet,
-		projectile_speed = 800,
-		shot_delay = 0.4,
-		shots = 16,
-		arc = 10
+		projectile_speed = 1600,
+		arc = 5,
+		shot_delay = 0.4
+
 	}
 
+	local shotgun = require("entities.weapons.shotgun"){
+		max_heat = 3,
+		shot_heat = 0.5,
+		
+		kind = "single",
+		projectile = bullet,
+		projectile_speed = 800,
+
+	}
 	local pistol = require("entities.weapons.projectile"){
 		max_heat = 3,
 		shot_heat = 0.25,
@@ -220,7 +230,11 @@ function game:enter(previous, w, h, nbots)
 		projectile_speed = 1000,
 		shot_delay = 0.3,
 		burst_shots = 3,
-		burst_shot_delay = 0.1
+		burst_shot_delay = 0.1,
+
+		shot_delay = 0.1,
+
+		shot_sound = "audio/weapons/laser_shot.wav"
 	}
 
 	local minigun = require("entities.weapons.triple_minigun"){
@@ -233,15 +247,20 @@ function game:enter(previous, w, h, nbots)
 
 		initial_shot_delay = 0.3,
 		final_shot_delay = 0.05,
-		spinup_time = 2
-	}
-	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher, [3] = shotgun}
+		spinup_time = 2,
 
-	player = world:spawnEntity{
+		shot_sound = "audio/weapons/laser_shot.wav"
+	}
+	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher, [3] = shotgun, [4] = fork_shotgun}
+
+	world:spawnEntity{
 		Name = "Player",
 		Team = "Player",
 
 		Color = {0, 255, 255},
+
+		Health = 30,
+		MaxHealth = 30,
 
 		Radius = PLAYER_RADIUS,
 		Position = find_position(PLAYER_RADIUS),
@@ -269,6 +288,9 @@ function game:enter(previous, w, h, nbots)
 			Name = "Ball " .. n,
 
 			Color = {255, 0, 0},
+
+			Health = 30,
+			MaxHealth = 30,
 
 			Radius = radius,
 			Position = find_position(radius),
@@ -338,7 +360,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = table.getn(weapon_table)
 		end
-		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
+		Player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	
 	elseif key == 'e' then
 		if weapon_value < table.getn(weapon_table) then
@@ -346,7 +368,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = 0
 		end
-		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
+		Player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	end
 	
 	world:emitEvent("KeyReleased", key)
