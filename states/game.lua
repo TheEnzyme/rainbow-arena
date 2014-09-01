@@ -184,12 +184,9 @@ function game:enter(previous, w, h, nbots)
 		radius = 5
 	}
 	
-	local pellet = require("entities.projectiles.bullet"){
-		radius = 1
-	}
-	
 	local rocket = require("entities.projectiles.rocket"){
-		radius = 15
+		radius = 15,
+		force = 10^9
 	}
 		
 	local rocket_launcher = require("entities.weapons.projectile"){
@@ -199,10 +196,10 @@ function game:enter(previous, w, h, nbots)
 		kind = "single",
 		projectile = rocket,
 		projectile_speed = 800,
-		shot_delay = 0.5
+		shot_delay = 0.5,
 	}
 	
-	local shotgun = require("entities.weapons.shotgun"){
+	local fork_shotgun = require("entities.weapons.fork_shotgun"){
 		max_heat = 2,
 		shot_heat = 0.1,
 

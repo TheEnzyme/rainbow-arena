@@ -29,7 +29,7 @@ function w_projectile:init(arg)
 	self.burst_shots = arg.burst_shots or 3
 	self.burst_shot_delay = arg.burst_shot_delay or 0.03
 
-	self.shot_timer = 0
+	self.shot_timer = arg.shot_timer or 0
 
 	w_base.init(self, arg)
 end
