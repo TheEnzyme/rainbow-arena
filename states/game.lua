@@ -171,6 +171,10 @@ local function calculate_drag_accel(max_speed, accel_time)
 	return drag, accel
 end
 
+local function switch_weapon(change_pos)
+	
+end
+
 function game:enter(previous, w, h, nbots)
 	world:clearEntities()
 
@@ -178,7 +182,9 @@ function game:enter(previous, w, h, nbots)
 
 	local c_drag, c_accel = calculate_drag_accel(800, 5)
 
-	local bullet = require("entities.projectiles.bullet")()
+	local bullet = require("entities.projectiles.bullet"){
+		damage = 1
+	}
 
 	
 	local large_bullet = require("entities.projectiles.bullet"){
@@ -187,7 +193,8 @@ function game:enter(previous, w, h, nbots)
 	
 	local rocket = require("entities.projectiles.rocket"){
 		radius = 15,
-		force = 10^9
+		force = 10^9,
+		timer = 300
 	}
 		
 	local rocket_launcher = require("entities.weapons.projectile"){
@@ -202,12 +209,13 @@ function game:enter(previous, w, h, nbots)
 	
 	local fork_shotgun = require("entities.weapons.fork_shotgun"){
 		max_heat = 2,
-		shot_heat = 0.1,
+		shot_heat = 0.01,
 
 		kind = "single",
 		projectile = bullet,
-		projectile_speed = 1600,
-		arc = 5,
+		projectile_speed = 800,
+		arc = 20,
+		shots = 8,
 		shot_delay = 0.4
 
 	}
@@ -227,7 +235,7 @@ function game:enter(previous, w, h, nbots)
 
 		kind = "burst",
 		projectile = large_bullet,
-		projectile_speed = 1000,
+		projectile_speed = 1600,
 		shot_delay = 0.3,
 		burst_shots = 3,
 		burst_shot_delay = 0.1,
@@ -253,14 +261,14 @@ function game:enter(previous, w, h, nbots)
 	}
 	weapon_table = {[0] = pistol, [1]= minigun, [2] = rocket_launcher, [3] = shotgun, [4] = fork_shotgun}
 
-	world:spawnEntity{
+	player = world:spawnEntity{
 		Name = "Player",
 		Team = "Player",
 
 		Color = {0, 255, 255},
 
-		Health = 30,
-		MaxHealth = 30,
+		Health = 10^10,
+		MaxHealth = 10^10,
 
 		Radius = PLAYER_RADIUS,
 		Position = find_position(PLAYER_RADIUS),
@@ -360,7 +368,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = table.getn(weapon_table)
 		end
-		Player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
+		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	
 	elseif key == 'e' then
 		if weapon_value < table.getn(weapon_table) then
@@ -368,7 +376,7 @@ function game:keyreleased(key)
 		else
 			weapon_value = 0
 		end
-		Player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
+		player.Weapon = weapon_table[weapon_value % (table.getn(weapon_table)+1)]
 	end
 	
 	world:emitEvent("KeyReleased", key)

@@ -15,11 +15,15 @@ function e_proj_physical:init(arg)
 	self.Radius = arg.radius or 3
 	self.Mass = arg.mass or math.pi * self.Radius^2
 	self.Color = arg.color or {255, 255, 0}
-
+	self.damage = arg.damage or 10
 	e_proj_base.init(self)
 end
 
 function e_proj_physical:on_collision(world, target, mtv)
+	if target.Health then
+		target.Health = target.Health - self.damage
+	end
+
 	-- Apply impact force.
 	target.Velocity = weaponutil.calculate_post_impact_velocity(
 		self.Mass, self.Velocity, target.Mass, target.Velocity)
