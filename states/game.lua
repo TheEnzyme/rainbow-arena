@@ -183,18 +183,20 @@ function game:enter(previous, w, h, nbots)
 	local c_drag, c_accel = calculate_drag_accel(800, 5)
 
 	local bullet = require("entities.projectiles.bullet"){
-		damage = 1
+		damage = 5
 	}
 
 	
 	local large_bullet = require("entities.projectiles.bullet"){
-		radius = 5
+		radius = 5,
+		damage = 5
 	}
 	
 	local rocket = require("entities.projectiles.rocket"){
 		radius = 15,
 		force = 10^9,
-		timer = 300
+		timer = 300,
+		damage = 20
 	}
 		
 	local rocket_launcher = require("entities.weapons.projectile"){
@@ -203,7 +205,7 @@ function game:enter(previous, w, h, nbots)
 		
 		kind = "single",
 		projectile = rocket,
-		projectile_speed = 800,
+		projectile_speed = 400,
 		shot_delay = 0.5,
 	}
 	
@@ -215,7 +217,7 @@ function game:enter(previous, w, h, nbots)
 		projectile = bullet,
 		projectile_speed = 800,
 		arc = 20,
-		shots = 8,
+		shots = 4,
 		shot_delay = 0.4
 
 	}
@@ -229,6 +231,7 @@ function game:enter(previous, w, h, nbots)
 		projectile_speed = 800,
 
 	}
+
 	local pistol = require("entities.weapons.projectile"){
 		max_heat = 3,
 		shot_heat = 0.25,
@@ -275,7 +278,7 @@ function game:enter(previous, w, h, nbots)
 		Velocity = vector.new(0, 0),
 		Acceleration = vector.new(0, 0),
 
-		Rotation = 0,
+		Rotation = 10,
 		RotationSpeed = 2,
 
 		Drag = c_drag,
