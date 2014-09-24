@@ -3,8 +3,6 @@ local timer = require("lib.hump.timer")
 local weaponutil = require("util.weapon")
 local util = require("lib.self.util")
 
-local soundutil = require("util.sound")
-
 ---
 
 local clone = util.table.clone
@@ -19,7 +17,7 @@ local w_projectile = class{__includes = w_base}
 function w_projectile:init(arg)
 	self.kind = arg.kind or "single"
 
-	self.shot_heat = arg.shot_heat or 0.25
+	self.shot_heat = arg.shot_heat or 0.1
 	self.projectile = arg.projectile
 	self.projectile_speed = arg.projectile_speed or 800
 	self.shot_delay = arg.shot_delay or 0.1
@@ -42,6 +40,7 @@ function w_projectile:spawn_projectile(host, world, pos, dir)
 	projectile.Position = pos + dir
 	projectile.Velocity = self.projectile_speed * dir + host.Velocity
 	projectile.Team = host.Team
+	projectile.Firer = host
 
 	-- Add host to collision exclusion list.
 	if not projectile.CollisionExcludeEntities then
@@ -50,7 +49,7 @@ function w_projectile:spawn_projectile(host, world, pos, dir)
 		table.insert(projectile.CollisionExcludeEntities, host)
 	end
 
-	world:spawnEntity(projectile)
+	world:spawn_entity(projectile)
 
 	return projectile
 end
@@ -73,9 +72,17 @@ function w_projectile:fire_projectile(host, world, pos, dir)
 	return p
 end
 
-function w_projectile:play_shot_sound(pos, pitch)
+function w_projectile:play_shot_sound(world, host, pitch)
 	if self.shot_sound then
-		soundutil.play_file(self.shot_sound, pos/SOUND_POSITION_SCALE, pitch)
+		world:spawn_entity{
+			Position = host.Position,
+			AttachedTo = host,
+			Lifetime = 0.5,
+			Sound = {
+				source = love.audio.newSource(self.shot_sound),
+				pitch = pitch
+			}
+		}
 	end
 end
 
@@ -95,7 +102,7 @@ end
 function w_projectile:fire(host, world, pos, dir)
 	self:fire_projectile(host, world, pos, dir)
 	self:apply_shot_effects(host, world, pos, dir)
-	self:play_shot_sound(pos)
+	self:play_shot_sound(world, host)
 end
 
 ---
@@ -108,6 +115,8 @@ function w_projectile:firing(dt, host, world, pos, dir)
 
 		elseif self.kind == "burst" and not self.fired then
 			self.fired = true
+
+			-- TODO: Fix this so shots always come from the circle, not where you originally fired.
 
 			local shot = 1
 			timer.add(self.burst_shot_delay, function(func)

@@ -79,7 +79,7 @@ return {
 			requires = {"Position", "Velocity"},
 			priority = 1,
 			update = function(entity, world, dt)
-				world:move_entity_to(entity, entity.Position + entity.Velocity*dt)
+				world:move_entity(entity, entity.Position + entity.Velocity*dt)
 
 				entity.Velocity = entity.Velocity + ((entity.Acceleration or vector.zero) - (entity.Drag or 0) * entity.Velocity)*dt
 			end
@@ -98,7 +98,7 @@ return {
 						local col, mtv = colliding(entity.Position,entity.Radius,
 							other.Position,other.Radius)
 						if col then
-							world:emitEvent("EntityCollision", entity, other, mtv)
+							world:emit_event("EntityCollision", entity, other, mtv)
 						end
 					end
 				end
@@ -107,41 +107,41 @@ return {
 
 		{
 			name = "ArenaCollision",
-			requires = {"Position", "Velocity", "Radius", "CollisionPhysics"},
+			requires = {"Position", "Velocity", "Radius"},
 			update = function(entity, world, dt)
 				local pos, radius = entity.Position, entity.Radius
 				local arena_w, arena_h = world.w, world.h
 
 				-- Left
 				if pos.x - radius < 0 then
-					world:move_entity_to(entity, radius, entity.Position.y)
+					world:move_entity(entity, radius, entity.Position.y)
 					entity.Velocity.x = -entity.Velocity.x
 
-					world:emitEvent("ArenaCollision", entity, vector.new(pos.x - radius, pos.y), "left")
+					world:emit_event("ArenaCollision", entity, vector.new(pos.x - radius, pos.y), "left")
 				end
 
 				-- Right
 				if pos.x + radius > arena_w then
-					world:move_entity_to(entity, arena_w - radius, entity.Position.y)
+					world:move_entity(entity, arena_w - radius, entity.Position.y)
 					entity.Velocity.x = -entity.Velocity.x
 
-					world:emitEvent("ArenaCollision", entity, vector.new(pos.x + radius, pos.y), "right")
+					world:emit_event("ArenaCollision", entity, vector.new(pos.x + radius, pos.y), "right")
 				end
 
 				-- Top
 				if pos.y - radius < 0 then
-					world:move_entity_to(entity, entity.Position.x, radius)
+					world:move_entity(entity, entity.Position.x, radius)
 					entity.Velocity.y = -entity.Velocity.y
 
-					world:emitEvent("ArenaCollision", entity, vector.new(pos.x, pos.y - radius), "top")
+					world:emit_event("ArenaCollision", entity, vector.new(pos.x, pos.y - radius), "top")
 				end
 
 				-- Bottom
 				if pos.y + radius > arena_h then
-					world:move_entity_to(entity, entity.Position.x, arena_h - radius)
+					world:move_entity(entity, entity.Position.x, arena_h - radius)
 					entity.Velocity.y = -entity.Velocity.y
 
-					world:emitEvent("ArenaCollision", entity, vector.new(pos.x, pos.y + radius), "left")
+					world:emit_event("ArenaCollision", entity, vector.new(pos.x, pos.y + radius), "left")
 				end
 			end
 		},
@@ -153,7 +153,7 @@ return {
 				entity.Lifetime = entity.Lifetime - dt
 
 				if entity.Lifetime <= 0 then
-					world:destroyEntity(entity)
+					world:destroy_entity(entity)
 				end
 			end
 		},
@@ -165,13 +165,22 @@ return {
 				if entity.Position.x < 0 - tolerance or entity.Position.x > world.w + tolerance
 					or entity.Position.y < 0 - tolerance or entity.Position.y > world.h + tolerance
 				then
-					world:destroyEntity(entity)
+					world:destroy_entity(entity)
 				end
 			end
 		}
 	},
 
 	events = {
+		{ -- Call arena collision functions of entities if they have them.
+			event = "ArenaCollision",
+			func = function(world, entity, pos, side)
+				if entity.OnArenaCollision then
+					entity:OnArenaCollision(world, pos, side)
+				end
+			end
+		},
+
 		{ -- Call the collision functions of entities if they have them.
 			event = "EntityCollision",
 			func = function(world, ent1, ent2, mtv)
@@ -207,11 +216,19 @@ return {
 
 				---
 
-				world:emitEvent("PhysicsCollision", ent1, ent2, mtv)
+				world:emit_event("PhysicsCollision", ent1, ent2, mtv)
 
 				---
 
-				world:move_entity_to(ent1, ent1.Position + mtv)
+				if ent1.Mass == 0 then
+					world:move_entity(ent1, ent1.Position + mtv)
+				elseif ent2.Mass == 0 then
+					world:move_entity(ent2, ent2.Position + mtv)
+				else
+					local masses = (ent1.Mass + ent2.Mass)
+					world:move_entity(ent1, ent1.Position + (ent2.Mass/masses)*mtv)
+					world:move_entity(ent2, ent2.Position - (ent1.Mass/masses)*mtv)
+				end
 
 				if ent2.Velocity then
 					-- Dynamic vs. Dynamic

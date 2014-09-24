@@ -7,7 +7,7 @@ local clamp = util.math.clamp
 
 ---
 
-local shake_threshold_speed = 150
+local SHAKE_STEP_SPEED = 150
 
 ---
 
@@ -53,11 +53,11 @@ return {
 		{ -- Screenshake for arena wall collisions.
 			event = "ArenaCollision",
 			func = function(world, entity, pos, side)
-				world:spawnEntity{
+				world:spawn_entity{
 					Position = pos:clone(),
 					Lifetime = 0.1,
 					Screenshake = {
-						intensity = entity.Velocity:len() / shake_threshold_speed,
+						intensity = entity.Velocity:len() / SHAKE_STEP_SPEED,
 						radius = 100,
 						duration = 0.1
 					}
@@ -67,11 +67,11 @@ return {
 		{ -- Screenshake for entity collision.
 			event = "PhysicsCollision",
 			func = function(world, ent1, ent2, mtv)
-				world:spawnEntity{
+				world:spawn_entity{
 					Position = ent2.Position + mtv,
 					Lifetime = 0.1,
 					Screenshake = {
-						intensity = (ent1.Velocity + ent2.Velocity):len() / shake_threshold_speed,
+						intensity = (ent1.Velocity + ent2.Velocity):len() / SHAKE_STEP_SPEED,
 						radius = 100,
 						duration = 0.1
 					}
