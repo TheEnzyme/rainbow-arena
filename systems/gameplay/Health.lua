@@ -12,7 +12,7 @@ return {
 	},
 
 	events = {
-		{
+		--[[{
 			event = "EntityDead",
 			func = function(world, entity)
 				-- Add an explosion!
@@ -28,7 +28,7 @@ return {
 					})
 				end
 			end
-		},
+		}, --]]
 		{
 			event = "EntityDead",
 			func = function(world, entity)

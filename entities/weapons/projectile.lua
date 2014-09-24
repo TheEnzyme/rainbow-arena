@@ -111,7 +111,6 @@ function w_projectile:firing(dt, host, world, pos, dir)
 
 			local shot = 1
 			timer.add(self.burst_shot_delay, function(func)
-				--local dir = dir:rotated()
 				self:fire(host, world, pos, dir)
 
 				if shot < self.burst_shots then

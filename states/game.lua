@@ -182,9 +182,7 @@ function game:enter(previous, w, h, nbots)
 
 	local c_drag, c_accel = calculate_drag_accel(800, 5)
 
-	local bullet = require("entities.projectiles.bullet"){
-		damage = 5
-	}
+	local bullet = require("entities.projectiles.bullet")()		
 
 	
 	local large_bullet = require("entities.projectiles.bullet"){
@@ -194,9 +192,9 @@ function game:enter(previous, w, h, nbots)
 	
 	local rocket = require("entities.projectiles.rocket"){
 		radius = 15,
-		force = 10^9,
-		timer = 300,
-		damage = 20
+		force = -10^9,
+		timer = 3,
+		damage = 20,
 	}
 		
 	local rocket_launcher = require("entities.weapons.projectile"){
@@ -217,8 +215,8 @@ function game:enter(previous, w, h, nbots)
 		projectile = bullet,
 		projectile_speed = 800,
 		arc = 20,
-		shots = 4,
-		shot_delay = 0.4
+		shots = 16,
+		shot_delay = 0.5
 
 	}
 
@@ -270,8 +268,8 @@ function game:enter(previous, w, h, nbots)
 
 		Color = {0, 255, 255},
 
-		Health = 10^10,
-		MaxHealth = 10^10,
+		Health = 30,
+		MaxHealth = 30,
 
 		Radius = PLAYER_RADIUS,
 		Position = find_position(PLAYER_RADIUS),

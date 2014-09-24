@@ -16,6 +16,10 @@ function e_proj_bullet:init(arg)
 end
 
 function e_proj_bullet:on_collision(world, target, mtv)
+	
+	if target.Health then
+		target.Health = target.Health - self.damage
+	end
 
 	world:destroyEntity(self)
 
